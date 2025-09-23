@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: issuerfin
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/prashanthseepathi/olivemeta.git
+    targetRevision: main
+    path: manifests/overlays/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
