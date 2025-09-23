@@ -1,0 +1,105 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: olivesampleissuermeta
+  namespace: olive-ns
+spec:
+  replicas: 2
+  strategy:
+    canary:
+      canaryService: olivesampleissuermeta-canary  # Canary service
+      stableService: olivesampleissuermeta-stable  # Stable service
+      steps:
+        - setWeight: 25        # Send 25% traffic to Canary
+        - pause: {duration: 60} # Wait 60 seconds
+        - setWeight: 50        # Send 50% traffic to Canary
+        - pause: {duration: 60}
+        - setWeight: 100       # Final step: move all traffic to Canary
+  selector:
+    matchLabels:
+      app: olivesampleissuermeta
+  template:
+    metadata:
+      labels:
+        app: olivesampleissuermeta
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: olivesampleimage
+          image: 192.168.14.143:5000/meta.3.1:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+            requests:
+              cpu: "1"
+              memory: "1Gi"
+          ports:
+            - containerPort: 8085
+          command: ["java"]
+          args: ["-jar", "upi-ubi-cbs-meta.RELEASE.jar"]
+          volumeMounts:
+            - name: upi-data
+              mountPath: /app/oliveissuermeta/application.properties
+              subPath: application.properties
+            - name: upi-data
+              mountPath: /app/oliveissuermeta/logback.xml
+              subPath: logback.xml
+            - name: upi-data
+              mountPath: /app/oliveissuermeta/cfg
+              subPath: cfg
+            - name: upi-data
+              mountPath: /app/oliveissuermeta/deploy
+              subPath: deploy
+            - name: log
+              mountPath: /app/oliveissuermeta/log
+            - name: tomcat
+              mountPath: /app/oliveissuermeta/tomcat/logs
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: upi-data
+          persistentVolumeClaim:
+            claimName: olivesamplepvc
+        - name: tomcat
+          emptyDir: {}
+        - name: log
+          emptyDir: {}
+
+---
+# Stable Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: olivesampleissuermeta-stable
+  namespace: olive-ns
+spec:
+  type: ClusterIP
+  selector:
+    app: olivesampleissuermeta
+  ports:
+    - port: 8085
+      targetPort: 8085
+
+---
+# Canary Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: olivesampleissuermeta-canary
+  namespace: olive-ns
+spec:
+  type: ClusterIP
+  selector:
+    app: olivesampleissuermeta
+  ports:
+    - port: 8085
+      targetPort: 8085
+
