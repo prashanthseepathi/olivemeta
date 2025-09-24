@@ -29,7 +29,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: olivesampleimage
-        image: 192.168.14.143:5000/oliveissuerfin:1.3
+        image: 192.168.14.143:5000/issuerfin:1.3
         imagePullPolicy: IfNotPresent
         resources:
           limits:
