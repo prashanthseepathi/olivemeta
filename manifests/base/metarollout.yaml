@@ -39,7 +39,7 @@ spec:
             cpu: "1"
             memory: "1Gi"
         ports:
-        - containerPort: 8085
+        - containerPort: 8083
         command: ["java"]
         args: ["-jar", "UPI-UBI-CBS-FIN-PROD-RELEASE.jar"]
         volumeMounts:
@@ -84,6 +84,6 @@ spec:
   selector:
     app: olivesampleissuermeta
   ports:
-  - port: 8085
-    targetPort: 8085
+  - port: 8083
+    targetPort: 8083
     nodePort: 30090
