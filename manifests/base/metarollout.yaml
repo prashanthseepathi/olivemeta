@@ -1,0 +1,105 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: olivesampleissuermeta
+  namespace: olive-ns
+spec:
+  replicas: 3
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: olivesampleissuermeta
+  strategy:
+    canary:
+      steps:
+      - setWeight: 5
+      - pause: {}
+      - setWeight: 20   # ~20% of pods will run new version
+      - pause: {duration: 30}
+      - setWeight: 50   # ~50% new pods
+      - pause: {duration: 60}
+      - setWeight: 100  # all new pods
+  template:
+    metadata:
+      labels:
+        app: olivesampleissuermeta
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: olivesampleimage
+        image: 192.168.14.143:5000/oliveissuermeta:3.0
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: "2"
+            memory: "2Gi"
+          requests:
+            cpu: "1"
+            memory: "1Gi"
+        ports:
+        - containerPort: 8085
+        command: ["java"]
+        args: ["-jar", "upi-ubi-cbs-meta.RELEASE.jar"]
+        volumeMounts:
+        - name: upi-data
+          mountPath: /app/oliveissuermeta/application.properties
+          subPath: application.properties
+        - name: upi-data
+          mountPath: /app/oliveissuermeta/logback.xml
+          subPath: logback.xml
+        - name: upi-data
+          mountPath: /app/oliveissuermeta/cfg
+          subPath: cfg
+        - name: upi-data
+          mountPath: /app/oliveissuermeta/deploy
+          subPath: deploy
+        - name: log
+          mountPath: /app/oliveissuermeta/log
+        - name: tomcat
+          mountPath: /app/oliveissuermeta/tomcat/logs
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+          seccompProfile:
+            type: RuntimeDefault
+        livenessProbe:
+          httpGet:
+            path: /custom-metrics/home
+            port: 8085
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /custom-metrics/home
+            port: 8085
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+      volumes:
+      - name: upi-data
+        persistentVolumeClaim:
+          claimName: olivesamplepvc
+      - name: tomcat
+        emptyDir: {}
+      - name: log
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: olivesamplesvc
+  namespace: olive-ns
+spec:
+  type: NodePort
+  selector:
+    app: olivesampleissuermeta
+  ports:
+  - port: 8085
+    targetPort: 8085
+    nodePort: 30090

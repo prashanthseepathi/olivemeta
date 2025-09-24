@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/prashanthseepathi/olivemeta.git
     targetRevision: main
-    path: manifests/overlays/dev
+    path: manifests/base
   destination:
     server: https://kubernetes.default.svc
     namespace: default
