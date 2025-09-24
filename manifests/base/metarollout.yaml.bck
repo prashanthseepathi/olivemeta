@@ -29,7 +29,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: olivesampleimage
-        image: 192.168.14.143:5000/oliveissuerfin:1.3
+        image: 192.168.14.143:5000/oliveissuermeta:3.0
         imagePullPolicy: IfNotPresent
         resources:
           limits:
@@ -41,7 +41,7 @@ spec:
         ports:
         - containerPort: 8085
         command: ["java"]
-        args: ["-jar", "UPI-UBI-CBS-FIN-PROD-RELEASE.jar"]
+        args: ["-jar", "upi-ubi-cbs-meta.RELEASE.jar"]
         volumeMounts:
         - name: upi-data
           mountPath: /app/oliveissuermeta/application.properties
