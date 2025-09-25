@@ -46,21 +46,21 @@ spec:
         args: ["-jar", "UPI-UBI-CBS-FIN-PROD-RELEASE.jar"]
         volumeMounts:
         - name: upi-data
-          mountPath: /app/oliveissuermeta/application.properties
+          mountPath: /app/oliveissuerfin/application.properties
           subPath: application.properties
         - name: upi-data
-          mountPath: /app/oliveissuermeta/logback.xml
+          mountPath: /app/oliveissuerfin/logback.xml
           subPath: logback.xml
         - name: upi-data
-          mountPath: /app/oliveissuermeta/cfg
+          mountPath: /app/oliveissuerfin/cfg
           subPath: cfg
         - name: upi-data
-          mountPath: /app/oliveissuermeta/deploy
+          mountPath: /app/oliveissuerfin/deploy
           subPath: deploy
         - name: log
-          mountPath: /app/oliveissuermeta/log
+          mountPath: /app/oliveissuerfin/log
         - name: tomcat
-          mountPath: /app/oliveissuermeta/tomcat/logs
+          mountPath: /app/oliveissuerfin/tomcat/logs
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
