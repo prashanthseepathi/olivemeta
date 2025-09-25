@@ -11,6 +11,8 @@ spec:
       app: olivesampleissuermeta
   strategy:
     canary:
+      canaryService: olivesample-canary-svc
+      stableService: olivesamplesvc
       steps:
       - setWeight: 5
       - pause: {}
